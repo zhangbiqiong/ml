@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 
-# 学习资料 https://www.jianshu.com/p/c53509ed9b52
-# y=w0x0+w1x1+w2x2
-# theta = np.array([0.0, 0.0, 0.0])  # 权重，也就是训练的目标 构造依据 [0.1,2,3]
+# 学习资料 https://www.cnblogs.com/lsqin/p/9342935.html
+# 学习资料 https://blog.csdn.net/csqazwsxedc/article/details/69690655
+
 X =  [  # 训练集
         [1.0, 5.0, 9.0],
         [1.0, 11.0, 21.0],
