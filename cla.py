@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.linear_model import LogisticRegression
 
 # 学习资料 https://www.jianshu.com/p/c53509ed9b52
 # y=w0x0+w1x1+w2x2
-theta = np.array([0.0, 0.0, 0.0])  # 权重，也就是训练的目标 构造依据 [0.1,2,3]
-X = np.array(
-    [  # 训练集
+# theta = np.array([0.0, 0.0, 0.0])  # 权重，也就是训练的目标 构造依据 [0.1,2,3]
+X =  [  # 训练集
         [1.0, 5.0, 9.0],
         [1.0, 11.0, 21.0],
         [1.0, 60.0, 70.0],
@@ -49,17 +50,16 @@ X = np.array(
         [1.0, 111.0, 332.0],
         [1.0, 131.0, 335.0],
     ]
-)
 
 
-y = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 # 线性归一化处理
 # X[:, 1] = (X[:, 1] - (X[:, 1].min())) / (X[:, 1].max() - (X[:, 1].min()))
 # X[:, 2] = (X[:, 2] - (X[:, 2].min())) / (X[:, 2].max() - (X[:, 2].min()))
 
 # print((X[:,0].max()))
-print(X)
+# print(X)
 
 # print("学习率:" + str(lr))
 # print("记录数:" + str(row))
@@ -68,27 +68,14 @@ ax_x = []
 ax_y = []
 
 
-def model(x,theta):
-    return sigmoid(np.dot(x,theta.T))
+def sigmoid(inX):  #sigmoid函数
+    return 1.0/(1+np.exp(-inX))
 
-def sigmoid(t):
-    return 1. / (1. + np.exp(-t))
+# def gradient(X, y, theta):
+#     return (X.T.dot(sigmoid(X.dot(theta)) - y)) / len(y)
 
-
-def gradient(X, y, theta):
-    return (X.T.dot(sigmoid(X.dot(theta)) - y)) / len(y)
-    # return ((sigmoid(X.dot(theta)) - y)* X[:, j]).sum()
-    # return (X.T.dot(sigmoid(X.dot(theta)) - y)) / len(y)
-    # grad=np.zeros(theta.shape)
-    # error=(model(X,theta)-y).ravel()
-    # for j in range(len(theta.ravel())):
-    #     term=np.multiply(error,X[:,j])
-    #     grad[0,j]=np.sum(term)/len(X)
-    # return grad[0,j]
-
-
-def j(X, y, theta):
-    return -(y.dot(np.log(sigmoid(X.dot(theta)))) + (1-y).dot(1-np.log(sigmoid(X.dot(theta))))) / len(y)
+# def j(X, y, theta):
+#     return -(y.dot(np.log(sigmoid(X.dot(theta)))) + (1-y).dot(1-np.log(sigmoid(X.dot(theta))))) / len(y)
 
 
 # def gra(j):
@@ -100,34 +87,45 @@ def j(X, y, theta):
 #     return gra
 
 
-def gd(X, y, theta, alpha=0.0001, n_iters=100):
-    cur_iters = 0
-    while cur_iters < n_iters:
-        theta = theta - alpha*gradient(X, y, theta)
-        # grad = gradient(X, y, theta,j)
-        # theta[0]=theta[0] -alpha* gradient(X, y, theta,0)
-        # theta[1]=theta[1] -alpha* gradient(X, y, theta,1)
-        # theta[2]=theta[2] -alpha* gradient(X, y, theta,2)
-        print(theta)
-        print(j(X, y, theta))
-        cur_iters += 1
-    return theta
 
 
-best_theta = gd(X, y, theta)
+def gradAscent(dataMat, labelMat): #梯度上升求最优参数
+    dataMatrix=np.mat(dataMat) #将读取的数据转换为矩阵
+    classLabels=np.mat(labelMat).transpose() #将读取的数据转换为矩阵
+    m,n = np.shape(dataMatrix)
+    alpha = 0.001  #设置梯度的阀值，该值越大梯度上升幅度越大
+    maxCycles = 5000 #设置迭代的次数，一般看实际数据进行设定，有些可能200次就够了
+    weights = np.ones((n,1)) #设置初始的参数，并都赋默认值为1。注意这里权重以矩阵形式表示三个参数。
+    for k in range(maxCycles):
+        h = sigmoid(dataMatrix*weights)
+        error = (classLabels - h)     #求导后差值
+        weights = weights + alpha * dataMatrix.transpose()* error #迭代更新权重
+        # print(weights)
+    return weights
+
+
+weights=gradAscent(X,y)
+
+PX=[[1.0,10.0,10.0]]
+print (sigmoid(np.mat(PX)*weights)>0.5)
+
+# model = LogisticRegression(verbose=1)
+# model.fit(X, y)
+# print (theta)
+# print('逻辑回归模型:\n',model)
+
+
+# PX=np.array([1.0,387.0,309.0])
+# print(model.predict(PX.reshape(1, -1)))
+
+
+# print(graAscent(X,y))
+# best_theta = gd(X, y, theta)
 #print(best_theta)
 
-px=np.array([1.0,2000.0,20000.0])
-print(model(px,best_theta))
+# px=np.array([1.0,2000.0,20000.0])
+# print(model(px,best_theta))
 # print(sigmoid(px.dot(best_theta)))
-
-
-
-
-
-
-
-
 
 # PX=np.array([1.0,213.0,213.0])
 # print(sigmoid(PX.T.dot(best_theta).sum()))
