@@ -89,7 +89,7 @@ def sigmoid(inX):  #sigmoid函数
 
 
 
-def gradAscent(dataMat, labelMat): #梯度上升求最优参数
+""" def gradAscent(dataMat, labelMat): #梯度上升求最优参数
     dataMatrix=np.mat(dataMat) #将读取的数据转换为矩阵
     classLabels=np.mat(labelMat).transpose() #将读取的数据转换为矩阵
     m,n = np.shape(dataMatrix)
@@ -101,12 +101,44 @@ def gradAscent(dataMat, labelMat): #梯度上升求最优参数
         error = (classLabels - h)     #求导后差值
         weights = weights + alpha * dataMatrix.transpose()* error #迭代更新权重
         # print(weights)
-    return weights
+    return weights """
+
+def graAscent(dataMatrix,dataLabel):
+    m,n=np.shape(dataMatrix)
+    matMatrix=np.mat(dataMatrix)
+    matLabel=np.mat(dataLabel).transpose()
+
+    w=np.ones((n,1))
+    alpha=0.001
+    num=5000
+    for i in range(num):
+        error=sigmoid(matMatrix*w)-matLabel
+        w=w-alpha*matMatrix.transpose()*error
+
+        print(np.square(error).sum())
+        ax_x.append(i)
+        ax_y.append(np.square(error).sum())
+
+    return w
 
 
-weights=gradAscent(X,y)
+fig=plt.figure()
+ax=fig.add_subplot()
+ax.set(
+    xlim = [0, 1500],
+    ylim = [0, 100],
+    title = "An Example Axes",
+    ylabel = "Y-Axis",
+    xlabel = "X-Axis",
 
-PX=[[1.0,10.0,10.0]]
+)
+weights=graAscent(X,y)
+ax.plot(ax_x, ax_y)
+plt.show()
+
+
+
+PX=[[1.0,111,111]]
 print (sigmoid(np.mat(PX)*weights)>0.5)
 
 # model = LogisticRegression(verbose=1)
