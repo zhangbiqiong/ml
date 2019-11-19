@@ -31,6 +31,7 @@ class neuralNetwork:
         output_errors=targets-final_outpus
         hidden_errors=numpy.dot(self.who.T,output_errors)
 
+
         self.who+=self.lr*numpy.dot((output_errors*final_outpus*(1.0-final_outpus)),numpy.transpose(hidden_outputs))
         self.wih+=self.lr*numpy.dot((hidden_errors*hidden_outputs*(1.0-hidden_outputs)),numpy.transpose(inputs))
 
@@ -145,7 +146,7 @@ Y=[
 ]
 
 
-batchsize=10
+batchsize=100
 
 fig=matplotlib.pyplot.figure()
 ax=fig.add_subplot()
@@ -181,8 +182,8 @@ print(numpy.floor((nn.query([1,181.0,190.0])*100)).transpose())
 print(numpy.floor((nn.query([1,241.0,280.0])*100)).transpose())
 
 print(numpy.floor((nn.query([1,31.0,11.0])*100)).transpose())
-print(numpy.floor((nn.query([1,61.0,91.0])*100)).transpose())
-print(numpy.floor((nn.query([1,131.0,180.0])*100)).transpose())
+print(numpy.floor((nn.query([1,71.0,91.0])*100)).transpose())
+print(numpy.floor((nn.query([1,139.0,180.0])*100)).transpose())
 print(numpy.floor((nn.query([1,251.0,230.0])*100)).transpose())
 
 
