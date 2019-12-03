@@ -116,7 +116,7 @@ def try_gpu():  # 本函数已保存在d2lzh包中方便以后使用
 ctx = try_gpu()
 
 
-lr, num_epochs = 0.9, 1
+lr, num_epochs = 0.9, 6
 net.initialize(force_reinit=True, ctx=ctx, init=init.Xavier())
 trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": lr})
 train_ch5(net, train_iter, test_iter, batch_size, trainer, ctx, num_epochs)
@@ -154,8 +154,8 @@ def show_fashion_mnist(images, labels):
 def printpic():
     transformer = gdata.vision.transforms.ToTensor()
     mnist_train = gdata.vision.FashionMNIST(train=True)
-    X, y = mnist_train[110:116]
-    X1=transformer(X)
+    X, y = mnist_train[180:186]
+    X1=transformer(X).as_in_context(ctx)
     y_hat = net(X1).argmax(axis=1)
     show_fashion_mnist(X, get_fashion_mnist_labels(y_hat.asnumpy()))
 
