@@ -10,8 +10,10 @@ from mxnet.gluon import nn
 from pylab import mpl, plt
 
 
+batch_size = 256
+
 def load_data_fashion_mnist(batch_size):
-    batch_size = 256
+    
     transformer = gdata.vision.transforms.ToTensor()
     if sys.platform.startswith("win"):
         num_workers = 0  # 0表示不用额外的进程来加速读取数据
@@ -36,6 +38,7 @@ def load_data_fashion_mnist(batch_size):
 
     return train_iter, test_iter
 
+# sigmoid relu
 
 net = nn.Sequential()
 net.add(
@@ -57,7 +60,7 @@ for layer in net:
     print(layer.name, "output shape:\t", X.shape)
 
 
-batch_size = 256
+
 train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size)
 
 
@@ -113,7 +116,7 @@ def try_gpu():  # 本函数已保存在d2lzh包中方便以后使用
 ctx = try_gpu()
 
 
-lr, num_epochs = 0.9, 2
+lr, num_epochs = 0.9, 1
 net.initialize(force_reinit=True, ctx=ctx, init=init.Xavier())
 trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": lr})
 train_ch5(net, train_iter, test_iter, batch_size, trainer, ctx, num_epochs)
@@ -148,28 +151,13 @@ def show_fashion_mnist(images, labels):
     plt.show()
 
 
-# mnist_train = gdata.vision.FashionMNIST(train=True)
-# X, y = mnist_train[0:6]
-# show_fashion_mnist(X, get_fashion_mnist_labels(y))
-
-
-
 def printpic():
     transformer = gdata.vision.transforms.ToTensor()
     mnist_train = gdata.vision.FashionMNIST(train=True)
-    X, y = mnist_train[10:16]
+    X, y = mnist_train[110:116]
     X1=transformer(X)
-    # mnist_test = gdata.vision.FashionMNIST(train=False)
-    # print_iter = gdata.DataLoader(
-    #         mnist_test.transform_first(transformer),
-    #         10
-    #     )
     y_hat = net(X1).argmax(axis=1)
     show_fashion_mnist(X, get_fashion_mnist_labels(y_hat.asnumpy()))
-    # for X, y in print_iter:
-    #         y_hat = net(X).argmax(axis=1)
-    #         show_fashion_mnist(X, get_fashion_mnist_labels(y_hat.asnumpy()))
-    #         break
 
 
 printpic()
