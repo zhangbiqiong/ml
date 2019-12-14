@@ -3,14 +3,21 @@ import math
 from mxnet import autograd, nd
 from mxnet.gluon import loss as gloss
 import time
-
+import numpy as np
+import mxnet as mx
 
 def load_data_alarm():
-    line = ["2", "4", "2", "4", "2", "4", "2", "4", "3", "9"]
-    idx_to_char = list(set(line))
+    doc = [
+    "2", "3", "6", "4", "7", 
+    "3", "2", "4", "3", "9",
+    "2", "4", "5", "3", "1", 
+    "7", "2", "4", "3", "9",
+    "1", "2", "5", "7", "4",
+    ]
+    idx_to_char = list(set(doc))
     char_to_idx = dict([(char, i) for i, char in enumerate(idx_to_char)])
     vocab_size = len(char_to_idx)
-    corpus_indices = [char_to_idx[char] for char in line]
+    corpus_indices = [char_to_idx[char] for char in doc]
     return corpus_indices, char_to_idx, idx_to_char, vocab_size
 
 
@@ -27,7 +34,8 @@ inputs = to_onehot(X, vocab_size)
 len(inputs), inputs[0].shape
 
 num_inputs, num_hiddens, num_outputs = vocab_size, 256, vocab_size
-ctx = d2l.try_gpu()
+# ctx = d2l.try_gpu()
+ctx = mx.cpu()
 print("will use", ctx)
 
 
@@ -102,19 +110,45 @@ def predict_rnn(
     return ",".join([idx_to_char[i] for i in output])
 
 
-pre = predict_rnn(
-    "2",
-    2,
-    rnn,
-    params,
-    init_rnn_state,
-    num_hiddens,
-    vocab_size,
-    ctx,
-    idx_to_char,
-    char_to_idx,
-)
-print(pre)
+# pre = predict_rnn(
+#     "2",
+#     2,
+#     rnn,
+#     params,
+#     init_rnn_state,
+#     num_hiddens,
+#     vocab_size,
+#     ctx,
+#     idx_to_char,
+#     char_to_idx,
+# )
+# print(pre)
+
+def data_iter_consecutive(corpus_indices, batch_size, num_steps, ctx=None):
+    """Sample mini-batches in a consecutive order from sequential data."""
+    corpus_indices = nd.array(corpus_indices, ctx=ctx)
+    data_len = len(corpus_indices)
+    batch_len = data_len // batch_size
+    indices = corpus_indices[0 : batch_size * batch_len].reshape((
+        batch_size, batch_len))
+    epoch_size = (batch_len - 1) // num_steps
+    for i in range(epoch_size):
+        i = i * num_steps
+        X = indices[:, i : i + num_steps]
+        Y = indices[:, i + 1 : i + num_steps + 1]
+        yield X, Y
+
+data_iter_fn = data_iter_consecutive
+data_iter = data_iter_fn(corpus_indices, 1, 5, ctx)
+for X, Y in data_iter:
+    # print('\nX:', X.asnumpy()[0].astype(np.int))
+    print('\nX:')
+    print(",".join([idx_to_char[i] for i in X.asnumpy()[0].astype(np.int)]))
+    # print('\nY:', Y.asnumpy()[0].astype(np.int))
+    print('\nY:')
+    print(",".join([idx_to_char[i] for i in Y.asnumpy()[0].astype(np.int)]))
+
+
 
 # 本函数已保存在d2lzh包中方便以后使用
 def grad_clipping(params, theta, ctx):
@@ -146,6 +180,7 @@ def train_and_predict_rnn(rnn, get_params, init_rnn_state, num_hiddens,
         l_sum, n, start = 0.0, 0, time.time()
         data_iter = data_iter_fn(corpus_indices, batch_size, num_steps, ctx)
         for X, Y in data_iter:
+            # print('X: ', X, '\nY:', Y, '\n')
             if is_random_iter:  # 如使用随机采样，在每个小批量更新前初始化隐藏状态
                 state = init_rnn_state(batch_size, num_hiddens, ctx)
             else:  # 否则需要使用detach函数从计算图分离隐藏状态
@@ -176,11 +211,13 @@ def train_and_predict_rnn(rnn, get_params, init_rnn_state, num_hiddens,
                     prefix, pred_len, rnn, params, init_rnn_state,
                     num_hiddens, vocab_size, ctx, idx_to_char, char_to_idx))
 
-num_epochs, num_steps, batch_size, lr, clipping_theta = 5, 2, 2, 1e2, 1e-2
-pred_period, pred_len, prefixes = 5, 5, ['2', '4']
+num_epochs, num_steps, batch_size, lr, clipping_theta = 1, 5, 1, 1e2, 1e-2
+pred_period, pred_len, prefixes = 1, 9, ['2']
 train_and_predict_rnn(rnn, get_params, init_rnn_state, num_hiddens,
                       vocab_size, ctx, corpus_indices, idx_to_char,
                       char_to_idx, False, num_epochs, num_steps, lr,
                       clipping_theta, batch_size, pred_period, pred_len,
                       prefixes)
+
+
 
