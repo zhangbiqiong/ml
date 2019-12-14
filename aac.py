@@ -2,10 +2,10 @@
 import numpy as np
 # import mxnet as mx
 from gensim.models import Word2Vec
+import random
 
-
-row = 20000
-col = 100
+row = 50000
+col = 50
 negativeword = set()
 
 def create_data():
@@ -37,6 +37,8 @@ data = create_data()
 def convert2str(data):
     newdata = []
     for line in data:
+        if line.count(44)>0 and random.randint(1,30)>1:
+            continue
         newline = []
         for word in line:
             newword = str(word)
