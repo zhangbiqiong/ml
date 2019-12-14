@@ -1,56 +1,55 @@
-import time
+# import time
 import numpy as np
-import mxnet as mx
+# import mxnet as mx
 from gensim.models import Word2Vec
 
 
-row = 2000
-col = 10
+row = 20000
+col = 100
 negativeword = set()
+
 def create_data():
-    doc = np.random.randint(11,99,(row,col))
-    for n in range(row-1):
-        line=doc[n]
-        listline=list(line)
+    doc = np.random.randint(11, 99, (row, col))
+    for n in range(row - 1):
+        line = doc[n]
+        listline = list(line)
         if listline.count(22) != 0 and listline.count(44) != 0:
             if listline.index(22) > listline.index(44):
                 line[listline.index(22)] = 44
                 line[listline.index(44)] = 22
-                print(line)
-                print('-----------------------------------------------------------') 
-    # print(doc)
-    # print('-----------------------------------------------------------')            
-    datafilter=[]
-    for n in range(row-1):
-        line=doc[n]   
-        listline=list(line)
+
+    datafilter = []
+    for n in range(row - 1):
+        line = doc[n]
+        listline = list(line)
         if listline.count(22) != 0:
-            datafilter.append(listline[:listline.index(22)])
-            for word in listline[:listline.index(22)]:
-                negativeword.add(str(word))
-            datafilter.append(listline[listline.index(22):])
+            datafilter.append(listline[: listline.index(22)])
+            # for word in listline[:listline.index(22)]:
+            if len(negativeword) < 5:
+                negativeword.add(str(listline[0]))
+            datafilter.append(listline[listline.index(22) :])
     return datafilter
 
-
-
-data=create_data()
-# print('-----------------------------------------------------------') 
+data = create_data()
+# print('-----------------------------------------------------------')
 # print(data)
 
 def convert2str(data):
-    newdata=[]
+    newdata = []
     for line in data:
-        newline=[]
+        newline = []
         for word in line:
-            newword=str(word)
+            newword = str(word)
             newline.append(newword)
         newdata.append(newline)
     return newdata
 
 
-newdata=convert2str(data)
-# print('-----------------------------------------------------------') 
+newdata = convert2str(data)
 # print(newdata)
+np.savetxt('a.txt',newdata,'%s')
+# np.array(newdata).save('aaa.txt')
+
 
 model = Word2Vec(
     sentences=newdata,  # We will supply the pre-processed list of moive lists to this parameter
@@ -64,5 +63,8 @@ model = Word2Vec(
     window=100,
 )
 
+print("-------------------------negativeword----------------------------------")
+print((list(negativeword)))
+print("-------------------------model.most_similar----------------------------------")
+print(model.most_similar(positive=["22"], negative=list(negativeword)))
 
-print(model.most_similar(positive=['22'],negative=list(negativeword),topn=100))
