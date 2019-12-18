@@ -93,7 +93,7 @@ model = Word2Vec(
 
 
 # X后面跟着Y M后面跟着N
-print(model.wv.most_similar(positive=['X','N','S'], negative=list('Y','T')))
+print(model.wv.most_similar(positive=['X','N','S'], negative=['Y','T']))
 # M后面跟着N S后面跟着T
 # print(model.wv.most_similar(positive=['M','T'], negative=list('N')))
 
